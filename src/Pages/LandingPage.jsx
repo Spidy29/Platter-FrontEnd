@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   FaMapMarkerAlt,
   FaUtensils,
@@ -133,12 +134,183 @@ const testimonials = [
   },
 ];
 
+const AuthButton = ({ onClick, text, icon, variant = "primary" }) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className={`flex items-center justify-center space-x-2 px-8 py-3 rounded-full text-lg font-semibold transition-colors ${
+      variant === "primary"
+        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700"
+        : "bg-white text-gray-800 border-2 border-gray-200 hover:border-indigo-500"
+    }`}
+    onClick={onClick}
+  >
+    {icon}
+    <span>{text}</span>
+  </motion.button>
+);
+
+const FeatureCard = ({ icon, title, description }) => (
+  <motion.div
+    whileHover={{ scale: 1.03, y: -5 }}
+    transition={{ type: "spring", stiffness: 300 }}
+    className="bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
+  >
+    <div className="flex flex-col items-center text-center">
+      {icon}
+      <h3 className="mt-4 text-lg font-semibold text-gray-900">{title}</h3>
+      <p className="mt-2 text-gray-600">{description}</p>
+    </div>
+  </motion.div>
+);
+
 function LandingPage() {
+  const navigate = useNavigate();
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState("customers");
+  const [isHovered, setIsHovered] = useState(false);
+
+  const features = [
+    {
+      icon: <MdRestaurant className="w-6 h-6 text-indigo-600" />,
+      title: "Restaurant Partners",
+      description: "Connect with top restaurants",
+    },
+    {
+      icon: <FaUtensils className="w-6 h-6 text-purple-600" />,
+      title: "Quality Food",
+      description: "Discover amazing cuisines",
+    },
+    {
+      icon: <MdDeliveryDining className="w-6 h-6 text-indigo-600" />,
+      title: "Quick Delivery",
+      description: "Fast & reliable service",
+    },
+  ];
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section with Auth Options */}
+      <div className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        {/* Background Animation */}
+        <div className="absolute inset-0 z-0">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.1 }}
+            transition={{ duration: 1 }}
+            className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500"
+          />
+          <motion.div
+            animate={{
+              background: [
+                "linear-gradient(to right, rgba(99,102,241,0.1), rgba(168,85,247,0.1))",
+                "linear-gradient(to right, rgba(168,85,247,0.1), rgba(99,102,241,0.1))",
+              ],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            className="absolute inset-0"
+          />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 max-w-4xl mx-auto text-center"
+        >
+          {/* Hero Text */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-5xl sm:text-6xl font-extrabold text-gray-900 mb-8"
+          >
+            Welcome to{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+              Platter
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-xl text-gray-600 mb-12"
+          >
+            Connect with amazing restaurants and discover delicious food
+            experiences
+          </motion.p>
+
+          {/* Auth Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6"
+          >
+            <AuthButton
+              onClick={() => navigate("/signup")}
+              text="Get Started"
+              icon={<FaArrowRight className="w-5 h-5" />}
+            />
+            <AuthButton
+              onClick={() => navigate("/login")}
+              text="Sign In"
+              icon={<FaUsers className="w-5 h-5" />}
+              variant="secondary"
+            />
+          </motion.div>
+
+          {/* Feature Cards */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-16"
+          >
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 + index * 0.1, duration: 0.8 }}
+              >
+                <FeatureCard {...feature} />
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-64 h-64 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                x: [0, 30, 0],
+                y: [0, 30, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 10 + i * 2,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Rest of your landing page content */}
       <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 font-sans">
         {/* Hero Section */}
         <section className="relative min-h-screen py-12 md:py-20 lg:py-24 overflow-hidden">
@@ -528,7 +700,7 @@ function LandingPage() {
           </div>
         </section>
       </div>
-    </>
+    </div>
   );
 }
 
