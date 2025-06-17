@@ -2,7 +2,38 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
+import { FaEnvelope, FaLock } from "react-icons/fa";
 import { authService } from "../../services/authService";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+};
+
+const InputField = ({ register, type, placeholder, error, icon: Icon }) => (
+  <motion.div className="relative" variants={fadeInUp}>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Icon className="h-5 w-5 text-indigo-600" />
+    </div>
+    <input
+      {...register}
+      type={type}
+      className="appearance-none rounded-xl relative block w-full pl-10 px-3 py-3 border border-gray-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm shadow-sm hover:shadow-md transition-shadow duration-200"
+      placeholder={placeholder}
+    />
+    {error && (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-500 text-xs mt-1"
+      >
+        {error}
+      </motion.p>
+    )}
+  </motion.div>
+);
 
 export default function Login() {
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -53,91 +84,94 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+      <motion.div
+        initial="initial"
+        animate="animate"
+        variants={fadeInUp}
+        className="max-w-md w-full space-y-8 p-10 bg-white rounded-2xl shadow-xl"
+      >
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isOtpSent ? "Verify your email" : "Sign in to your account"}
-          </h2>
+          <motion.h2
+            variants={fadeInUp}
+            className="mt-6 text-center text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
+          >
+            {isOtpSent ? "Verify Email" : "Welcome Back"}
+          </motion.h2>
+          <motion.p
+            variants={fadeInUp}
+            className="mt-2 text-center text-sm text-gray-600"
+          >
+            {isOtpSent
+              ? "Enter the OTP sent to your email"
+              : "Sign in to continue to your account"}
+          </motion.p>
         </div>
 
         {!isOtpSent ? (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="email" className="sr-only">
-                  Email
-                </label>
-                <input
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  type="email"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+          <motion.form
+            variants={fadeInUp}
+            className="mt-8 space-y-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="rounded-md space-y-4">
+              <InputField
+                register={register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
+                })}
+                type="email"
+                placeholder="Email address"
+                error={errors.email?.message}
+                icon={FaEnvelope}
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Send OTP
-              </button>
-            </div>
-          </form>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              Send OTP
+            </motion.button>
+          </motion.form>
         ) : (
-          <form
+          <motion.form
+            variants={fadeInUp}
             className="mt-8 space-y-6"
             onSubmit={handleOtpSubmit(onOtpSubmit)}
           >
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="otp" className="sr-only">
-                  OTP
-                </label>
-                <input
-                  {...registerOtp("otp", {
-                    required: "OTP is required",
-                    pattern: {
-                      value: /^[0-9]{6}$/,
-                      message: "OTP must be 6 digits",
-                    },
-                  })}
-                  type="text"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter 6-digit OTP"
-                />
-                {otpErrors.otp && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {otpErrors.otp.message}
-                  </p>
-                )}
-              </div>
+            <div className="rounded-md space-y-4">
+              <InputField
+                register={registerOtp("otp", {
+                  required: "OTP is required",
+                  pattern: {
+                    value: /^[0-9]{6}$/,
+                    message: "OTP must be 6 digits",
+                  },
+                })}
+                type="text"
+                placeholder="Enter 6-digit OTP"
+                error={otpErrors.otp?.message}
+                icon={FaLock}
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Verify OTP
-              </button>
-            </div>
-          </form>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              Verify OTP
+            </motion.button>
+          </motion.form>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

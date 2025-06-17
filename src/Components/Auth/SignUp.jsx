@@ -2,7 +2,63 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
+import { FaUser, FaEnvelope, FaLock, FaBuilding } from "react-icons/fa";
 import { authService } from "../../services/authService";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+};
+
+const InputField = ({ register, type, placeholder, error, icon: Icon }) => (
+  <motion.div className="relative" variants={fadeInUp}>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Icon className="h-5 w-5 text-indigo-600" />
+    </div>
+    <input
+      {...register}
+      type={type}
+      className="appearance-none rounded-xl relative block w-full pl-10 px-3 py-3 border border-gray-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm shadow-sm hover:shadow-md transition-shadow duration-200"
+      placeholder={placeholder}
+    />
+    {error && (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-500 text-xs mt-1"
+      >
+        {error}
+      </motion.p>
+    )}
+  </motion.div>
+);
+
+const SelectField = ({ register, error }) => (
+  <motion.div className="relative" variants={fadeInUp}>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <FaBuilding className="h-5 w-5 text-indigo-600" />
+    </div>
+    <select
+      {...register}
+      className="appearance-none rounded-xl relative block w-full pl-10 px-3 py-3 border border-gray-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm shadow-sm hover:shadow-md transition-shadow duration-200"
+    >
+      <option value="">Select user type</option>
+      <option value="hotel">Hotel</option>
+      <option value="customer">Customer</option>
+    </select>
+    {error && (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-500 text-xs mt-1"
+      >
+        {error}
+      </motion.p>
+    )}
+  </motion.div>
+);
 
 export default function SignUp() {
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -30,7 +86,7 @@ export default function SignUp() {
       } else {
         toast.error(response.message || "Registration failed");
       }
-    } catch (error) {
+    } catch (err) {
       toast.error("Registration failed");
     }
   };
@@ -47,135 +103,117 @@ export default function SignUp() {
       } else {
         toast.error(response.message || "OTP verification failed");
       }
-    } catch (error) {
+    } catch (err) {
       toast.error("OTP verification failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+      <motion.div
+        initial="initial"
+        animate="animate"
+        variants={fadeInUp}
+        className="max-w-md w-full space-y-8 p-10 bg-white rounded-2xl shadow-xl"
+      >
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isOtpSent ? "Verify your email" : "Create your account"}
-          </h2>
+          <motion.h2
+            variants={fadeInUp}
+            className="mt-6 text-center text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
+          >
+            {isOtpSent ? "Verify Email" : "Create Account"}
+          </motion.h2>
+          <motion.p
+            variants={fadeInUp}
+            className="mt-2 text-center text-sm text-gray-600"
+          >
+            {isOtpSent
+              ? "Enter the OTP sent to your email"
+              : "Join our community today"}
+          </motion.p>
         </div>
 
         {!isOtpSent ? (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div className="rounded-md shadow-sm space-y-4">
-              <div>
-                <label htmlFor="name" className="sr-only">
-                  Name
-                </label>
-                <input
-                  {...register("name", { required: "Name is required" })}
-                  type="text"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Full name"
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
+          <motion.form
+            variants={fadeInUp}
+            className="mt-8 space-y-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="rounded-md space-y-4">
+              <InputField
+                register={register("name", {
+                  required: "Name is required",
+                })}
+                type="text"
+                placeholder="Full name"
+                error={errors.name?.message}
+                icon={FaUser}
+              />
 
-              <div>
-                <label htmlFor="email" className="sr-only">
-                  Email
-                </label>
-                <input
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  type="email"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+              <InputField
+                register={register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
+                })}
+                type="email"
+                placeholder="Email address"
+                error={errors.email?.message}
+                icon={FaEnvelope}
+              />
 
-              <div>
-                <label htmlFor="userType" className="sr-only">
-                  User Type
-                </label>
-                <select
-                  {...register("userType", {
-                    required: "User type is required",
-                  })}
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                >
-                  <option value="">Select user type</option>
-                  <option value="hotel">Hotel</option>
-                  <option value="customer">Customer</option>
-                </select>
-                {errors.userType && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.userType.message}
-                  </p>
-                )}
-              </div>
+              <SelectField
+                register={register("userType", {
+                  required: "User type is required",
+                })}
+                error={errors.userType?.message}
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Sign up
-              </button>
-            </div>
-          </form>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              Create Account
+            </motion.button>
+          </motion.form>
         ) : (
-          <form
+          <motion.form
+            variants={fadeInUp}
             className="mt-8 space-y-6"
             onSubmit={handleOtpSubmit(onOtpSubmit)}
           >
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="otp" className="sr-only">
-                  OTP
-                </label>
-                <input
-                  {...registerOtp("otp", {
-                    required: "OTP is required",
-                    pattern: {
-                      value: /^[0-9]{6}$/,
-                      message: "OTP must be 6 digits",
-                    },
-                  })}
-                  type="text"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter 6-digit OTP"
-                />
-                {otpErrors.otp && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {otpErrors.otp.message}
-                  </p>
-                )}
-              </div>
+            <div className="rounded-md space-y-4">
+              <InputField
+                register={registerOtp("otp", {
+                  required: "OTP is required",
+                  pattern: {
+                    value: /^[0-9]{6}$/,
+                    message: "OTP must be 6 digits",
+                  },
+                })}
+                type="text"
+                placeholder="Enter 6-digit OTP"
+                error={otpErrors.otp?.message}
+                icon={FaLock}
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Verify OTP
-              </button>
-            </div>
-          </form>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              Verify OTP
+            </motion.button>
+          </motion.form>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
