@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { FaEnvelope } from "react-icons/fa";
 import { authService } from "../../services/authService";
 
 const fadeInUp = {
@@ -36,55 +36,55 @@ const InputField = ({ register, type, placeholder, error, icon: Icon }) => (
 );
 
 export default function Login() {
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [email, setEmail] = useState("");
   const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const {
-    register: registerOtp,
-    handleSubmit: handleOtpSubmit,
-    formState: { errors: otpErrors },
-  } = useForm();
-
   const onSubmit = async (data) => {
-    try {
-      const response = await authService.initiateLogin(data.email);
-      if (response.success) {
-        setEmail(data.email);
-        setIsOtpSent(true);
-        toast.success("OTP sent to your email");
-      } else {
-        toast.error(response.message || "Failed to send OTP");
-      }
-    } catch (error) {
-      toast.error("Login failed");
-    }
-  };
+    const loginPromise = authService.initiateLogin(data.email);
 
-  const onOtpSubmit = async (data) => {
     try {
-      const response = await authService.verifyLogin({
-        email,
-        otp: data.otp,
-      });
-      if (response.success) {
-        toast.success("Login successful");
-        navigate("/dashboard");
-      } else {
-        toast.error(response.message || "Invalid OTP");
-      }
+      toast.promise(
+        loginPromise,
+        {
+          loading: "Sending login OTP...",
+          success: (response) => {
+            if (response.success) {
+              navigate("/verify-otp", {
+                state: {
+                  email: data.email,
+                  isLogin: true,
+                },
+              });
+              return "✉️ OTP sent! Please check your email.";
+            }
+            throw new Error(response.message || "Failed to send OTP");
+          },
+          error: "🔒 Could not initiate login. Please try again.",
+        },
+        {
+          style: {
+            minWidth: "300px",
+          },
+          success: {
+            duration: 3000,
+            icon: "📨",
+          },
+          error: {
+            duration: 3000,
+            icon: "❌",
+          },
+        }
+      );
     } catch (error) {
-      toast.error("OTP verification failed");
+      console.error("Login error:", error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <motion.div
         initial="initial"
         animate="animate"
@@ -96,81 +96,57 @@ export default function Login() {
             variants={fadeInUp}
             className="mt-6 text-center text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
           >
-            {isOtpSent ? "Verify Email" : "Welcome Back"}
+            Welcome Back
           </motion.h2>
           <motion.p
             variants={fadeInUp}
             className="mt-2 text-center text-sm text-gray-600"
           >
-            {isOtpSent
-              ? "Enter the OTP sent to your email"
-              : "Sign in to continue to your account"}
+            Sign in to continue to your account
           </motion.p>
         </div>
 
-        {!isOtpSent ? (
-          <motion.form
-            variants={fadeInUp}
-            className="mt-8 space-y-6"
-            onSubmit={handleSubmit(onSubmit)}
-          >
-            <div className="rounded-md space-y-4">
-              <InputField
-                register={register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
-                  },
-                })}
-                type="email"
-                placeholder="Email address"
-                error={errors.email?.message}
-                icon={FaEnvelope}
-              />
-            </div>
+        <motion.form
+          variants={fadeInUp}
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <div className="rounded-md space-y-4">
+            <InputField
+              register={register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address",
+                },
+              })}
+              type="email"
+              placeholder="Email address"
+              error={errors.email?.message}
+              icon={FaEnvelope}
+            />
+          </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              Send OTP
-            </motion.button>
-          </motion.form>
-        ) : (
-          <motion.form
-            variants={fadeInUp}
-            className="mt-8 space-y-6"
-            onSubmit={handleOtpSubmit(onOtpSubmit)}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            <div className="rounded-md space-y-4">
-              <InputField
-                register={registerOtp("otp", {
-                  required: "OTP is required",
-                  pattern: {
-                    value: /^[0-9]{6}$/,
-                    message: "OTP must be 6 digits",
-                  },
-                })}
-                type="text"
-                placeholder="Enter 6-digit OTP"
-                error={otpErrors.otp?.message}
-                icon={FaLock}
-              />
-            </div>
+            Sign In
+          </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
+          <div className="text-center text-sm">
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/signup")}
+              className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
             >
-              Verify OTP
-            </motion.button>
-          </motion.form>
-        )}
+              Sign up here
+            </button>
+          </div>
+        </motion.form>
       </motion.div>
     </div>
   );

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -61,55 +60,55 @@ const SelectField = ({ register, error }) => (
 );
 
 export default function SignUp() {
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [email, setEmail] = useState("");
   const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const {
-    register: registerOtp,
-    handleSubmit: handleOtpSubmit,
-    formState: { errors: otpErrors },
-  } = useForm();
-
   const onSubmit = async (data) => {
-    try {
-      const response = await authService.initiateRegister(data);
-      if (response.success) {
-        setEmail(data.email);
-        setIsOtpSent(true);
-        toast.success("OTP sent to your email");
-      } else {
-        toast.error(response.message || "Registration failed");
-      }
-    } catch (err) {
-      toast.error("Registration failed");
-    }
-  };
+    const registerPromise = authService.initiateRegister(data);
 
-  const onOtpSubmit = async (data) => {
     try {
-      const response = await authService.verifyRegister({
-        email,
-        otp: data.otp,
-      });
-      if (response.success) {
-        toast.success("Registration successful");
-        navigate("/dashboard");
-      } else {
-        toast.error(response.message || "OTP verification failed");
-      }
+      toast.promise(
+        registerPromise,
+        {
+          loading: "Creating your account...",
+          success: (response) => {
+            if (response.success) {
+              navigate("/verify-otp", {
+                state: {
+                  email: data.email,
+                  isLogin: false,
+                },
+              });
+              return "🎉 Account created! Please check your email for OTP.";
+            }
+            throw new Error(response.message || "Registration failed");
+          },
+          error: "😕 Could not create account. Please try again.",
+        },
+        {
+          style: {
+            minWidth: "300px",
+          },
+          success: {
+            duration: 3000,
+            icon: "✨",
+          },
+          error: {
+            duration: 3000,
+            icon: "❌",
+          },
+        }
+      );
     } catch (err) {
-      toast.error("OTP verification failed");
+      console.error("Registration error:", err);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <motion.div
         initial="initial"
         animate="animate"
@@ -121,98 +120,74 @@ export default function SignUp() {
             variants={fadeInUp}
             className="mt-6 text-center text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
           >
-            {isOtpSent ? "Verify Email" : "Create Account"}
+            Create Account
           </motion.h2>
           <motion.p
             variants={fadeInUp}
             className="mt-2 text-center text-sm text-gray-600"
           >
-            {isOtpSent
-              ? "Enter the OTP sent to your email"
-              : "Join our community today"}
+            Join our community today
           </motion.p>
         </div>
 
-        {!isOtpSent ? (
-          <motion.form
-            variants={fadeInUp}
-            className="mt-8 space-y-6"
-            onSubmit={handleSubmit(onSubmit)}
+        <motion.form
+          variants={fadeInUp}
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <div className="rounded-md space-y-4">
+            <InputField
+              register={register("name", {
+                required: "Name is required",
+              })}
+              type="text"
+              placeholder="Full name"
+              error={errors.name?.message}
+              icon={FaUser}
+            />
+
+            <InputField
+              register={register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address",
+                },
+              })}
+              type="email"
+              placeholder="Email address"
+              error={errors.email?.message}
+              icon={FaEnvelope}
+            />
+
+            <SelectField
+              register={register("userType", {
+                required: "User type is required",
+              })}
+              error={errors.userType?.message}
+            />
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            <div className="rounded-md space-y-4">
-              <InputField
-                register={register("name", {
-                  required: "Name is required",
-                })}
-                type="text"
-                placeholder="Full name"
-                error={errors.name?.message}
-                icon={FaUser}
-              />
+            Create Account
+          </motion.button>
 
-              <InputField
-                register={register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
-                  },
-                })}
-                type="email"
-                placeholder="Email address"
-                error={errors.email?.message}
-                icon={FaEnvelope}
-              />
-
-              <SelectField
-                register={register("userType", {
-                  required: "User type is required",
-                })}
-                error={errors.userType?.message}
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
+          <div className="text-center text-sm">
+            Already have an account?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
             >
-              Create Account
-            </motion.button>
-          </motion.form>
-        ) : (
-          <motion.form
-            variants={fadeInUp}
-            className="mt-8 space-y-6"
-            onSubmit={handleOtpSubmit(onOtpSubmit)}
-          >
-            <div className="rounded-md space-y-4">
-              <InputField
-                register={registerOtp("otp", {
-                  required: "OTP is required",
-                  pattern: {
-                    value: /^[0-9]{6}$/,
-                    message: "OTP must be 6 digits",
-                  },
-                })}
-                type="text"
-                placeholder="Enter 6-digit OTP"
-                error={otpErrors.otp?.message}
-                icon={FaLock}
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              Verify OTP
-            </motion.button>
-          </motion.form>
-        )}
+              Login here
+            </button>
+          </div>
+        </motion.form>
       </motion.div>
     </div>
   );

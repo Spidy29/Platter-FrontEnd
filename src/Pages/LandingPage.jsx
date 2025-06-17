@@ -223,6 +223,16 @@ const testimonials = [
   },
 ];
 
+// Import required fonts
+import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/500.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
+import "@fontsource/instrument-sans/400.css";
+import "@fontsource/instrument-sans/500.css";
+import "@fontsource/instrument-sans/600.css";
+import "@fontsource/instrument-sans/700.css";
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -265,20 +275,21 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50">
+    <div className="min-h-screen font-sans bg-gradient-to-br from-sky-50 via-white to-blue-50 overflow-x-hidden">
       {/* Navigation */}
-      <nav className={`fixed w-full z-50 ${glassStyle} py-4`}>
+      <nav
+        className={`fixed w-full z-50 ${glassStyle} py-2 md:py-4 backdrop-blur-xl shadow-lg`}
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+            {/* Logo */}{" "}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-xl font-bold text-sky-600"
+              className="text-2xl md:text-3xl font-display font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text"
             >
               VerifiedEats
             </motion.div>
-
             {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 text-gray-600 hover:text-sky-600 focus:outline-none"
@@ -301,7 +312,6 @@ const LandingPage = () => {
                 )}
               </svg>
             </button>
-
             {/* Desktop Nav Links */}
             <div className="hidden md:flex space-x-8">
               {navLinks.map((link) => (
@@ -314,7 +324,6 @@ const LandingPage = () => {
                 </a>
               ))}
             </div>
-
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center space-x-4">
               <motion.button
@@ -383,7 +392,6 @@ const LandingPage = () => {
           </AnimatePresence>
         </div>
       </nav>
-
       {/* Hero Section */}
       <motion.section
         initial="initial"
@@ -413,31 +421,34 @@ const LandingPage = () => {
             animate="animate"
             className="space-y-8"
           >
+            {" "}
             <motion.h1
               variants={fadeInUp}
-              className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 text-transparent bg-clip-text"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text"
             >
               Discover & Book the Best Restaurants
-            </motion.h1>
-
+            </motion.h1>{" "}
             <motion.p
               variants={fadeInUp}
-              className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto"
+              className="text-lg sm:text-xl md:text-2xl text-gray-600/90 max-w-3xl mx-auto font-body leading-relaxed mt-6"
             >
-              Your journey to extraordinary dining experiences begins here
+              Your journey to extraordinary dining experiences begins here.
+              Discover curated restaurants, authentic reviews, and seamless
+              bookings.
             </motion.p>
-
             {/* Search Bar */}
             <motion.div
               variants={fadeInUp}
-              className={`${glassStyle} max-w-2xl mx-auto p-2 rounded-full flex items-center gap-2`}
+              className={`${glassStyle} max-w-2xl mx-auto p-2 md:p-3 rounded-full flex items-center gap-2 shadow-xl hover:shadow-2xl transition-shadow duration-300`}
             >
-              <div className="flex-1 flex items-center gap-2 px-4">
-                <FaMapMarkerAlt className={`text-2xl ${iconColors.primary}`} />
+              <div className="flex-1 flex items-center gap-3 px-4 md:px-6">
+                <FaMapMarkerAlt
+                  className={`text-xl md:text-2xl ${iconColors.primary} animate-pulse`}
+                />
                 <input
                   type="text"
                   placeholder="Enter your location..."
-                  className="w-full bg-transparent border-none focus:outline-none text-lg"
+                  className="w-full bg-transparent border-none focus:outline-none text-base md:text-lg font-body placeholder-gray-400"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -456,19 +467,18 @@ const LandingPage = () => {
                     className={`text-xl ${iconColors.accent1} cursor-pointer hover:scale-110 transition-transform`}
                   />
                 )}
-              </div>
+              </div>{" "}
               <button
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white px-6 md:px-8 py-3 rounded-full font-display font-semibold hover:shadow-xl transform hover:scale-105 transition-all flex items-center gap-2 group"
                 onClick={() => setIsLoading(true)}
               >
-                <BiSearch className="text-xl" />
-                Search
+                <BiSearch className="text-xl group-hover:rotate-12 transition-transform" />
+                <span className="hidden sm:inline">Search</span>
               </button>
             </motion.div>
           </motion.div>
         </div>
       </motion.section>
-
       {/* Stats Section */}
       <motion.section
         initial="initial"
@@ -520,7 +530,6 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </motion.section>
-
       {/* How It Works */}
       <section className="py-20 bg-white" id="how-it-works">
         <div className="container mx-auto px-4">
@@ -530,9 +539,11 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-gray-600">
-              Your journey to exceptional dining
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text tracking-tight leading-tight">
+              How It Works
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600/90 max-w-2xl mx-auto font-body">
+              Your journey to exceptional dining made simple and delightful
             </p>
           </motion.div>
 
@@ -558,7 +569,6 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
       {/* Features Section */}
       <motion.section
         initial="initial"
@@ -572,37 +582,37 @@ const LandingPage = () => {
             className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
             Why Choose VerifiedEats
-          </motion.h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          </motion.h2>{" "}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
                 variants={scaleUp}
                 whileHover="hover"
-                className={`${glassStyle} rounded-xl p-6 relative overflow-hidden group`}
+                className={`${glassStyle} rounded-2xl p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl transition-shadow duration-300`}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />{" "}
                 <div
-                  className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-2xl
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-2xl transform group-hover:scale-110 transition-transform duration-300 bg-gradient-to-br
                   ${
                     index % 4 === 0
-                      ? iconColors.primary
+                      ? "from-blue-100 to-blue-50 text-blue-600"
                       : index % 4 === 1
-                      ? iconColors.accent1
+                      ? "from-purple-100 to-purple-50 text-purple-600"
                       : index % 4 === 2
-                      ? iconColors.accent2
-                      : iconColors.secondary
+                      ? "from-indigo-100 to-indigo-50 text-indigo-600"
+                      : "from-emerald-100 to-emerald-50 text-emerald-600"
                   }
                 `}
                 >
                   {feature.icon}
                 </div>
-
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-
+                <h3 className="text-xl font-display font-semibold mb-3 group-hover:text-blue-600 transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600/90 font-body leading-relaxed">
+                  {feature.description}
+                </p>
                 <motion.div
                   className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                   whileHover={{ x: 5 }}
@@ -614,7 +624,6 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </motion.section>
-
       {/* Restaurant Tools */}
       <motion.section
         initial="initial"
@@ -673,7 +682,6 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </motion.section>
-
       {/* Testimonials */}
       <motion.section
         initial="initial"
@@ -687,15 +695,14 @@ const LandingPage = () => {
             className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
             What Our Users Say
-          </motion.h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          </motion.h2>{" "}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-6">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
                 variants={scaleUp}
                 whileHover="hover"
-                className={`${glassStyle} rounded-xl p-8 relative overflow-hidden group`}
+                className={`${glassStyle} rounded-2xl p-8 md:p-10 relative overflow-hidden group hover:shadow-2xl transition-shadow duration-300`}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -748,7 +755,6 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </motion.section>
-
       {/* FAQ Section */}
       <motion.section
         initial="initial"
@@ -762,15 +768,14 @@ const LandingPage = () => {
             className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
             Frequently Asked Questions
-          </motion.h2>
-
-          <div className="space-y-6">
+          </motion.h2>{" "}
+          <div className="space-y-4 md:space-y-6 px-4 sm:px-6">
             {faqs.map((faq, index) => (
               <motion.div
                 key={index}
                 variants={scaleUp}
                 whileHover="hover"
-                className={`${glassStyle} rounded-xl overflow-hidden`}
+                className={`${glassStyle} rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300`}
               >
                 <button
                   className="w-full p-6 text-left flex justify-between items-center gap-4"
@@ -810,10 +815,9 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </motion.section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-20">
-        <div className="container mx-auto px-4">
+      {/* Footer */}{" "}
+      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {/* Company Info */}
             <div>
