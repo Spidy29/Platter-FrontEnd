@@ -32,11 +32,25 @@ const OtpVerification = () => {
       navigate("/login");
       return;
     }
-    setIsVerifying(true);
 
+    // For registration, ensure we have the required user data
+    if (
+      !isLogin &&
+      (!location.state?.userData?.name || !location.state?.userData?.userType)
+    ) {
+      toast.error("Missing registration details");
+      navigate("/signup");
+      return;
+    }
+    setIsVerifying(true);
     const verifyPromise = isLogin
       ? authService.verifyLogin({ email, otp: data.otp })
-      : authService.verifyRegister({ email, otp: data.otp });
+      : authService.verifyRegister({
+          email,
+          otp: data.otp,
+          name: location.state?.userData?.name,
+          userType: location.state?.userData?.userType,
+        });
 
     toast
       .promise(
@@ -44,13 +58,17 @@ const OtpVerification = () => {
         {
           loading: "Verifying OTP...",
           success: (response) => {
-            if (response.success) {
+            console.log("Verification response:", response);
+            if (response.status === 201) {
               setTimeout(() => {
-                navigate(isLogin ? "/dashboard" : "/login");
+                navigate("/dashboard");
               }, 1000);
-              return isLogin
-                ? "🎉 Login successful! Redirecting to dashboard..."
-                : "✨ Registration successful! Please login to continue.";
+              return "🎉 Account verified! Redirecting to dashboard...";
+            } else if (isLogin && response.success) {
+              setTimeout(() => {
+                navigate("/dashboard");
+              }, 1000);
+              return "🎉 Login successful! Redirecting to dashboard...";
             }
             throw new Error(response.message || "Verification failed");
           },

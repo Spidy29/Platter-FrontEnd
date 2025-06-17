@@ -27,7 +27,11 @@ export const authService = {
         body: JSON.stringify(verificationData),
         credentials: "include",
       });
-      return await response.json();
+      const data = await response.json();
+      return {
+        ...data,
+        status: response.status,
+      };
     } catch (error) {
       throw new Error("Registration verification failed");
     }

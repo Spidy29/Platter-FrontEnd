@@ -43,9 +43,10 @@ const SelectField = ({ register, error }) => (
       {...register}
       className="appearance-none rounded-xl relative block w-full pl-10 px-3 py-3 border border-gray-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm shadow-sm hover:shadow-md transition-shadow duration-200"
     >
+      {" "}
       <option value="">Select user type</option>
-      <option value="hotel">Hotel</option>
-      <option value="customer">Customer</option>
+      <option value="HOTEL">HOTEL</option>
+      <option value="CUSTOMER">CUSTOMER</option>
     </select>
     {error && (
       <motion.p
@@ -75,14 +76,19 @@ export default function SignUp() {
         {
           loading: "Creating your account...",
           success: (response) => {
-            if (response.success) {
+            // API returns message and email on success with 200 status
+            if (response.message && response.email) {
               navigate("/verify-otp", {
                 state: {
-                  email: data.email,
+                  email: response.email,
                   isLogin: false,
+                  userData: {
+                    name: data.name,
+                    userType: data.userType,
+                  },
                 },
               });
-              return "🎉 Account created! Please check your email for OTP.";
+              return `✨ ${response.message}`;
             }
             throw new Error(response.message || "Registration failed");
           },
