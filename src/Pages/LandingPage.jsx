@@ -12,7 +12,6 @@ import {
   FaUsers,
   FaArrowRight,
   FaSearch,
-  FaTableList,
   FaHotel,
   FaFacebook,
   FaInstagram,
@@ -22,12 +21,15 @@ import {
   FaPhoneAlt,
   FaEnvelope,
   FaMicrophone,
+  FaQuoteLeft,
+  FaChevronDown,
 } from "react-icons/fa";
 import {
   MdRestaurant,
   MdDeliveryDining,
   MdRateReview,
   MdVerified,
+  MdTableRestaurant,
   MdLocationOn,
   MdPayments,
   MdSecurity,
@@ -39,9 +41,9 @@ import { AiOutlineQrcode } from "react-icons/ai";
 
 // Animation variants
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 60 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
 };
 
 const staggerContainer = {
@@ -49,18 +51,47 @@ const staggerContainer = {
   animate: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.2,
+      delayChildren: 0.3,
     },
   },
 };
 
-const cardHover = {
-  initial: { scale: 1 },
+const scaleUp = {
+  initial: { scale: 0.8, opacity: 0 },
+  animate: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15,
+    },
+  },
   hover: {
-    scale: 1.03,
-    transition: { type: "spring", stiffness: 300 },
+    scale: 1.05,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 10,
+    },
   },
 };
+
+const iconColors = {
+  primary: "text-blue-500",
+  secondary: "text-purple-500",
+  success: "text-emerald-500",
+  warning: "text-amber-500",
+  info: "text-cyan-500",
+  danger: "text-rose-500",
+  accent1: "text-indigo-500",
+  accent2: "text-teal-500",
+};
+
+// Glassmorphism styles
+const glassStyle =
+  "backdrop-filter backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl";
 
 // Navigation Data
 const navLinks = [
@@ -96,7 +127,7 @@ const customerJourney = [
   {
     title: "Quick Booking",
     description: "Book your table instantly",
-    icon: <FaTableList />,
+    icon: <MdTableRestaurant />,
   },
   {
     title: "Order & Pay",
@@ -130,7 +161,7 @@ const features = [
   {
     title: "Smart Booking",
     description: "Real-time seat management & wait time",
-    icon: <FaTableList />,
+    icon: <MdTableRestaurant />,
   },
   {
     title: "QR Ordering",
@@ -164,7 +195,7 @@ const restaurantTools = [
   {
     title: "Table Management",
     description: "Efficient seat allocation system",
-    icon: <FaTableList />,
+    icon: <MdTableRestaurant />,
   },
   {
     title: "Menu Control",
@@ -192,47 +223,51 @@ const testimonials = [
   },
 ];
 
-// FAQ Data
-const faqs = {
-  customers: [
-    {
-      q: "Are reviews genuine?",
-      a: "Yes, only verified customers who have dined can post reviews.",
-    },
-    {
-      q: "Can I cancel a booking?",
-      a: "Yes, you can cancel up to 30 minutes before your booking time.",
-    },
-    {
-      q: "What if the dish isn't good?",
-      a: "We have a customer satisfaction guarantee and handle complaints promptly.",
-    },
-  ],
-  restaurants: [
-    {
-      q: "How to list my restaurant?",
-      a: "Simply click 'List Your Restaurant' and follow the verification process.",
-    },
-    {
-      q: "Is there a monthly cost?",
-      a: "We have flexible plans starting from free listing to premium features.",
-    },
-    {
-      q: "Can I manage bookings?",
-      a: "Yes, you get a complete booking management system in your dashboard.",
-    },
-  ],
-};
-
-function LandingPage() {
+const LandingPage = () => {
   const navigate = useNavigate();
-  const [location, setLocation] = useState("");
-  const [activeFaqTab, setActiveFaqTab] = useState("customers");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [faqs, setFaqs] = useState([
+    {
+      question: "How does VerifiedEats work?",
+      answer:
+        "VerifiedEats makes it easy to discover and book the best restaurants in your area. Simply enter your location, browse verified restaurants, and book your table instantly. You can also read reviews, view menus, and get personalized recommendations.",
+      isOpen: false,
+    },
+    {
+      question: "Is it free to use VerifiedEats?",
+      answer:
+        "Yes, VerifiedEats is completely free for diners! You can search restaurants, read reviews, and make reservations without any cost. Restaurants pay a small fee to be listed on our platform.",
+      isOpen: false,
+    },
+    {
+      question: "How do I know the restaurants are verified?",
+      answer:
+        "All restaurants on VerifiedEats go through a thorough verification process. We check their licenses, health certificates, and customer reviews. Only restaurants that meet our quality standards are listed.",
+      isOpen: false,
+    },
+    {
+      question: "Can I cancel or modify my reservation?",
+      answer:
+        "Yes, you can easily modify or cancel your reservation through your account up to 2 hours before your booking time. Some restaurants may have specific cancellation policies.",
+      isOpen: false,
+    },
+  ]);
+
+  const toggleFAQ = (index) => {
+    setFaqs(
+      faqs.map((faq, i) => ({
+        ...faq,
+        isOpen: i === index ? !faq.isOpen : false,
+      }))
+    );
+  };
 
   return (
-    <div className="bg-gradient-to-b from-sky-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm">
+      <nav className={`fixed w-full z-50 ${glassStyle} py-4`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -244,7 +279,30 @@ function LandingPage() {
               VerifiedEats
             </motion.div>
 
-            {/* Nav Links */}
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-gray-600 hover:text-sky-600 focus:outline-none"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+
+            {/* Desktop Nav Links */}
             <div className="hidden md:flex space-x-8">
               {navLinks.map((link) => (
                 <a
@@ -258,12 +316,13 @@ function LandingPage() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/login")}
                 className="px-4 py-2 text-sky-600 font-medium"
+                aria-label="Login to your account"
               >
                 Login
               </motion.button>
@@ -272,167 +331,195 @@ function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/signup")}
                 className="px-4 py-2 bg-sky-600 text-white rounded-lg font-medium hover:bg-sky-700 transition-colors"
+                aria-label="Create a new account"
               >
                 Sign Up
               </motion.button>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="md:hidden py-4"
+              >
+                <div className="flex flex-col space-y-4">
+                  {navLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="text-gray-600 hover:text-sky-600 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {link.title}
+                    </a>
+                  ))}
+                  <hr className="my-2 border-gray-200" />
+                  <button
+                    onClick={() => {
+                      navigate("/login");
+                      setIsMenuOpen(false);
+                    }}
+                    className="text-sky-600 font-medium text-left"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate("/signup");
+                      setIsMenuOpen(false);
+                    }}
+                    className="bg-sky-600 text-white rounded-lg font-medium px-4 py-2 hover:bg-sky-700 transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-20 relative overflow-hidden">
-        <div className="container mx-auto px-4">
+      <motion.section
+        initial="initial"
+        animate="animate"
+        className="relative min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8"
+      >
+        {/* Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.1 }}
+            transition={{ duration: 1 }}
+            className="absolute -top-1/2 -right-1/2 w-[1000px] h-[1000px] rounded-full bg-gradient-to-br from-blue-600 to-purple-600"
+          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] rounded-full bg-gradient-to-tr from-emerald-600 to-cyan-600"
+          />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto text-center">
           <motion.div
             variants={staggerContainer}
             initial="initial"
             animate="animate"
-            className="max-w-5xl mx-auto text-center space-y-8"
+            className="space-y-8"
           >
-            {/* Hero Badge */}
-            <motion.div
-              variants={fadeInUp}
-              className="inline-flex items-center gap-2 bg-sky-50 px-4 py-2 rounded-full text-sky-600 text-sm font-medium"
-            >
-              <MdVerified className="text-lg" />
-              Real Food. Real Reviews. Real Experience.
-            </motion.div>
-
-            {/* Hero Title */}
             <motion.h1
               variants={fadeInUp}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight"
+              className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 text-transparent bg-clip-text"
             >
-              Verified Food Reviews.
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-600">
-                Real Customers.
-              </span>
-              <br />
-              One Powerful App.
+              Discover & Book the Best Restaurants
             </motion.h1>
 
-            {/* Hero Description */}
             <motion.p
               variants={fadeInUp}
-              className="text-xl text-gray-600 max-w-3xl mx-auto"
+              className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto"
             >
-              Tired of fake Google reviews? Discover the best food near you based on
-              verified customer experiences. From seat booking to payment, everything
-              in one place.
+              Your journey to extraordinary dining experiences begins here
             </motion.p>
 
             {/* Search Bar */}
             <motion.div
               variants={fadeInUp}
-              className="max-w-2xl mx-auto"
+              className={`${glassStyle} max-w-2xl mx-auto p-2 rounded-full flex items-center gap-2`}
             >
-              <div className="flex gap-4 p-2 bg-white rounded-2xl shadow-xl">
-                <div className="flex-1 relative">
-                  <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500" />
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Enter your location"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-transparent outline-none"
+              <div className="flex-1 flex items-center gap-2 px-4">
+                <FaMapMarkerAlt className={`text-2xl ${iconColors.primary}`} />
+                <input
+                  type="text"
+                  placeholder="Enter your location..."
+                  className="w-full bg-transparent border-none focus:outline-none text-lg"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {isLoading ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className={`w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full`}
                   />
-                </div>
-                <button className="px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200 flex items-center gap-2">
-                  Find Restaurants <FaArrowRight />
-                </button>
+                ) : (
+                  <FaMicrophone
+                    className={`text-xl ${iconColors.accent1} cursor-pointer hover:scale-110 transition-transform`}
+                  />
+                )}
               </div>
-            </motion.div>
-
-            {/* Hero CTAs */}
-            <motion.div
-              variants={fadeInUp}
-              className="flex flex-wrap justify-center gap-4"
-            >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 bg-sky-600 text-white rounded-lg font-medium hover:bg-sky-700 transition-colors flex items-center gap-2"
+              <button
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
+                onClick={() => setIsLoading(true)}
               >
-                <FaTableList /> Book a Table Instantly
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 border-2 border-sky-600 text-sky-600 rounded-lg font-medium hover:bg-sky-50 transition-colors flex items-center gap-2"
-              >
-                <FaHotel /> List Your Restaurant
-              </motion.button>
+                <BiSearch className="text-xl" />
+                Search
+              </button>
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Background Elements */}
-        <div className="absolute inset-0 -z-10">
-          <motion.div
-            animate={{
-              background: [
-                "radial-gradient(circle at 50% 50%, rgba(14,165,233,0.1), rgba(59,130,246,0.1))",
-                "radial-gradient(circle at 50% 50%, rgba(59,130,246,0.1), rgba(14,165,233,0.1))",
-              ],
-            }}
-            transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
-            className="absolute inset-0"
-          />
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-64 h-64 bg-gradient-to-r from-sky-400/10 to-blue-500/10 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                x: [0, 30, 0],
-                y: [0, 30, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 10 + i * 2,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-            />
-          ))}
-        </div>
-      </section>
+      </motion.section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-br from-sky-50/50 to-blue-50/50">
-        <div className="container mx-auto px-4">
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-8"
-          >
+      <motion.section
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        className="py-20 px-4 sm:px-6 lg:px-8"
+      >
+        <motion.div variants={staggerContainer} className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
-                variants={cardHover}
+                variants={scaleUp}
                 whileHover="hover"
-                className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`${glassStyle} rounded-xl p-6 text-center relative overflow-hidden group`}
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="text-sky-500 text-3xl mb-4">
-                    {React.cloneElement(stat.icon, { className: "w-8 h-8" })}
-                  </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
-                    {stat.value}
-                  </div>
-                  <div className="mt-2 text-gray-600">{stat.label}</div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div
+                  className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4 text-3xl
+                  ${
+                    index % 4 === 0
+                      ? iconColors.primary
+                      : index % 4 === 1
+                      ? iconColors.accent1
+                      : index % 4 === 2
+                      ? iconColors.accent2
+                      : iconColors.secondary
+                  }
+                `}
+                >
+                  {stat.icon}
                 </div>
+
+                <motion.h4
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
+                >
+                  {stat.value}+
+                </motion.h4>
+
+                <p className="text-gray-600 font-medium">{stat.label}</p>
+
+                <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
               </motion.div>
             ))}
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </motion.div>
+      </motion.section>
 
       {/* How It Works */}
       <section className="py-20 bg-white" id="how-it-works">
@@ -444,20 +531,24 @@ function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-gray-600">Your journey to exceptional dining</p>
+            <p className="text-xl text-gray-600">
+              Your journey to exceptional dining
+            </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {customerJourney.map((step, index) => (
               <motion.div
                 key={index}
-                variants={cardHover}
+                variants={scaleUp}
                 whileHover="hover"
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`${glassStyle} rounded-xl p-8 relative overflow-hidden group`}
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mb-6">
-                    {React.cloneElement(step.icon, { className: "w-8 h-8 text-sky-600" })}
+                    {React.cloneElement(step.icon, {
+                      className: "w-8 h-8 text-sky-600",
+                    })}
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                   <p className="text-gray-600">{step.description}</p>
@@ -468,166 +559,257 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-20 bg-gradient-to-br from-sky-50 to-white">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+      {/* Features Section */}
+      <motion.section
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent via-blue-50/50 to-transparent"
+      >
+        <motion.div variants={staggerContainer} className="max-w-7xl mx-auto">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
-            <h2 className="text-4xl font-bold mb-4">Advanced Features</h2>
-            <p className="text-xl text-gray-600">Powered by cutting-edge technology</p>
-          </motion.div>
+            Why Choose VerifiedEats
+          </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
-                variants={cardHover}
+                variants={scaleUp}
                 whileHover="hover"
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`${glassStyle} rounded-xl p-6 relative overflow-hidden group`}
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                    {React.cloneElement(feature.icon, { className: "w-8 h-8 text-sky-600" })}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div
+                  className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-2xl
+                  ${
+                    index % 4 === 0
+                      ? iconColors.primary
+                      : index % 4 === 1
+                      ? iconColors.accent1
+                      : index % 4 === 2
+                      ? iconColors.accent2
+                      : iconColors.secondary
+                  }
+                `}
+                >
+                  {feature.icon}
                 </div>
+
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+
+                <motion.div
+                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  whileHover={{ x: 5 }}
+                >
+                  <FaArrowRight className="text-blue-500" />
+                </motion.div>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Restaurant Tools */}
-      <section className="py-20 bg-white" id="for-restaurants">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+      <motion.section
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent via-blue-50/50 to-transparent"
+      >
+        <motion.div variants={staggerContainer} className="max-w-7xl mx-auto">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
-            <h2 className="text-4xl font-bold mb-4">Smart Hotel Tools</h2>
-            <p className="text-xl text-gray-600">Everything you need to grow your business</p>
-          </motion.div>
+            Powerful Tools for Restaurants
+          </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {restaurantTools.map((tool, index) => (
               <motion.div
                 key={index}
-                variants={cardHover}
+                variants={scaleUp}
                 whileHover="hover"
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`${glassStyle} rounded-xl p-8 relative overflow-hidden group`}
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mb-6">
-                    {React.cloneElement(tool.icon, { className: "w-8 h-8 text-sky-600" })}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{tool.title}</h3>
-                  <p className="text-gray-600">{tool.description}</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div
+                  className={`w-16 h-16 rounded-xl flex items-center justify-center mb-6 text-3xl
+                  ${
+                    index % 3 === 0
+                      ? iconColors.primary
+                      : index % 3 === 1
+                      ? iconColors.accent1
+                      : iconColors.accent2
+                  }
+                  transform group-hover:scale-110 transition-transform duration-300
+                `}
+                >
+                  {tool.icon}
                 </div>
+
+                <h3 className="text-2xl font-semibold mb-4">{tool.title}</h3>
+                <p className="text-gray-600 mb-6">{tool.description}</p>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 group-hover:shadow-lg transition-shadow"
+                >
+                  Learn More
+                  <FaArrowRight className="transform group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+
+                <motion.div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-bl-full transform translate-x-16 -translate-y-16 group-hover:translate-x-8 group-hover:-translate-y-8 transition-transform duration-300" />
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-br from-sky-50 to-white">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+      <motion.section
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        className="py-20 px-4 sm:px-6 lg:px-8"
+      >
+        <motion.div variants={staggerContainer} className="max-w-7xl mx-auto">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
-            <h2 className="text-4xl font-bold mb-4">What Users Are Saying</h2>
-            <p className="text-xl text-gray-600">Real stories from our community</p>
-          </motion.div>
+            What Our Users Say
+          </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
-                variants={cardHover}
+                variants={scaleUp}
                 whileHover="hover"
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`${glassStyle} rounded-xl p-8 relative overflow-hidden group`}
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="text-5xl text-sky-300 mb-6">"</div>
-                  <p className="text-lg text-gray-600 mb-6">{testimonial.content}</p>
-                  <h4 className="font-semibold">{testimonial.author}</h4>
-                  <p className="text-sky-600">{testimonial.role}</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div className="flex items-center gap-4 mb-6">
+                  <div
+                    className={`w-16 h-16 rounded-full overflow-hidden ring-2 ring-offset-2 
+                    ${
+                      index % 3 === 0
+                        ? "ring-blue-500"
+                        : index % 3 === 1
+                        ? "ring-purple-500"
+                        : "ring-emerald-500"
+                    }`}
+                  >
+                    <img
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold">
+                      {testimonial.name}
+                    </h4>
+                    <p className="text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <FaQuoteLeft className="absolute -top-4 -left-2 text-4xl text-blue-100" />
+                  <p className="text-gray-600 mb-4 pl-8">
+                    {testimonial.comment}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar
+                      key={i}
+                      className={`${
+                        i < testimonial.rating
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      } text-xl`}
+                    />
+                  ))}
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+      <motion.section
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent via-blue-50/50 to-transparent"
+      >
+        <motion.div variants={staggerContainer} className="max-w-3xl mx-auto">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
           >
-            <h2 className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <div className="flex justify-center gap-4 mb-8">
-              <button
-                onClick={() => setActiveFaqTab("customers")}
-                className={`px-6 py-2 rounded-lg transition-all ${
-                  activeFaqTab === "customers"
-                    ? "bg-sky-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                For Customers
-              </button>
-              <button
-                onClick={() => setActiveFaqTab("restaurants")}
-                className={`px-6 py-2 rounded-lg transition-all ${
-                  activeFaqTab === "restaurants"
-                    ? "bg-sky-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                For Restaurants
-              </button>
-            </div>
-          </motion.div>
+            Frequently Asked Questions
+          </motion.h2>
 
-          <div className="max-w-3xl mx-auto">
-            <AnimatePresence mode="wait">
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
               <motion.div
-                key={activeFaqTab}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-4"
+                key={index}
+                variants={scaleUp}
+                whileHover="hover"
+                className={`${glassStyle} rounded-xl overflow-hidden`}
               >
-                {faqs[activeFaqTab].map((faq, index) => (
-                  <motion.div
-                    key={index}
-                    variants={cardHover}
-                    whileHover="hover"
-                    className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                <button
+                  className="w-full p-6 text-left flex justify-between items-center gap-4"
+                  onClick={() => toggleFAQ(index)}
+                >
+                  <span className="font-semibold text-lg flex-1">
+                    {faq.question}
+                  </span>
+                  <motion.span
+                    animate={{ rotate: faq.isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`text-xl ${
+                      faq.isOpen ? "text-blue-600" : "text-gray-400"
+                    }`}
                   >
-                    <h3 className="text-lg font-semibold mb-2">{faq.q}</h3>
-                    <p className="text-gray-600">{faq.a}</p>
-                  </motion.div>
-                ))}
+                    <FaChevronDown />
+                  </motion.span>
+                </button>
+
+                <AnimatePresence>
+                  {faq.isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="px-6 pb-6"
+                    >
+                      <div className="prose prose-blue max-w-none">
+                        <p className="text-gray-600">{faq.answer}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
-            </AnimatePresence>
+            ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-20">
@@ -646,17 +828,26 @@ function LandingPage() {
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     About Us
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Terms & Conditions
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Privacy Policy
                   </a>
                 </li>
@@ -668,17 +859,26 @@ function LandingPage() {
               <h3 className="text-lg font-semibold mb-4">Help</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     FAQs
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Chat Support
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Contact Us
                   </a>
                 </li>
@@ -724,6 +924,6 @@ function LandingPage() {
       </footer>
     </div>
   );
-}
+};
 
 export default LandingPage;
